@@ -1,0 +1,11 @@
+[project]
+name = "managment-telegram-bot"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "aiogram>=3.30.0",
+    "pydantic-settings>=2.14.2",
+    "sqlalchemy>=2.0.51",
+]

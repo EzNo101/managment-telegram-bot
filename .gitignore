@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+build/
+dist/
+wheels/
+*.egg-info/
+.eggs/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Testing / tooling
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pyright/
+
+# Env / secrets
+.env
+.env.local
+.env.production
+
+# Databases (local dev)
+*.db
+*.sqlite
+*.sqlite3
+
+# MacOS
+.DS_Store
+.DS_Store?
+._*
+.AppleDouble
+.AppleDB
+.Spotlight-V100
+.Trashes
+Thumbs.db
+
+# IDE / editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
