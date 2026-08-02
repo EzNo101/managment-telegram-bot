@@ -20,4 +20,3 @@ class PaymentStatus(StrEnum):
 class SubscriptionStatus(StrEnum):
     ACTIVE = "active"
     EXPIRED = "expired"
-    CANCELLED = "cancelled"
