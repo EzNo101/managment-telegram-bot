@@ -11,6 +11,9 @@ class Settings(BaseSettings):
     DB_POOL_TIMEOUT: int
     DB_PRE_PING: bool
 
+    # Basic admins
+    ADMIN_IDS: list[int] = []
+
     model_config = SettingsConfigDict(env_file=".env")
 
 
