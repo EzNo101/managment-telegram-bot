@@ -4,10 +4,10 @@ from types import TracebackType
 from typing import Self
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
-from src.infra.repositories.payment_repository import PaymentRepository
-from src.infra.repositories.plan_repository import PlanRepository
-from src.infra.repositories.subscription_repository import SubscriptionRepository
-from src.infra.repositories.user_repository import UserRepository
+from src.infra.db.repositories.payment import PaymentRepository
+from src.infra.db.repositories.plan import PlanRepository
+from src.infra.db.repositories.subscription import SubscriptionRepository
+from src.infra.db.repositories.user import UserRepository
 
 
 class UnitOfWork:
@@ -22,6 +22,7 @@ class UnitOfWork:
     """
 
     users: UserRepository
+    plans: PlanRepository
     payments: PaymentRepository
     subscriptions: SubscriptionRepository
     plans: PlanRepository
@@ -33,6 +34,7 @@ class UnitOfWork:
     async def __aenter__(self) -> Self:
         self._session = self._session_factory()
         self.users = UserRepository(self._session)
+        self.plans = PlanRepository(self._session)
         self.payments = PaymentRepository(self._session)
         self.subscriptions = SubscriptionRepository(self._session)
         self.plans = PlanRepository(self._session)
