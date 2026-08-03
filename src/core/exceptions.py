@@ -12,3 +12,7 @@ class PlanNotFound(Exception):
 
 class SubscriptionNotFound(Exception):
     """Raised when a subscription is not found in the database."""
+
+
+class PaymentNotFound(Exception):
+    """Raised when a payment is not found in the database."""

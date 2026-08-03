@@ -43,24 +43,37 @@ class SubscriptionService:
         async with UnitOfWork(self._session_factory) as uow:
             return await uow.subscriptions.get_active_by_user(user_id)
 
-    async def activate(self, user_id: int, plan: Plan) -> Subscription:
+    async def activate(
+        self,
+        user_id: int,
+        plan: Plan,
+        uow: UnitOfWork | None = None,
+    ) -> Subscription:
         """Activate a subscription, extending an active one or creating a new one.
 
         If the user already has an active subscription, its end date is extended
         by the plan duration. Otherwise a new subscription starts from now.
+
+        When called from within another service transaction, pass the open ``uow``
+        so all changes share a single transaction.
         """
-        async with UnitOfWork(self._session_factory) as uow:
-            existing = await uow.subscriptions.get_active_by_user(user_id)
+        async def _run(u: UnitOfWork) -> Subscription:
+            existing = await u.subscriptions.get_active_by_user(user_id)
             now = datetime.now(UTC)
             if existing:
                 existing.end_date += timedelta(days=plan.duration_days)
                 return existing
-            return await uow.subscriptions.add(
+            return await u.subscriptions.add(
                 user_id,
                 plan.id,
                 now,
                 now + timedelta(days=plan.duration_days),
             )
+
+        if uow is not None:
+            return await _run(uow)
+        async with UnitOfWork(self._session_factory) as u:
+            return await _run(u)
 
     async def expire_all(self) -> None:
         """Mark all ended active subscriptions as expired."""

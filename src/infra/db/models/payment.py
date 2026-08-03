@@ -19,6 +19,7 @@ class Payment(Base, IdMixin, CreatedAtMixin, UpdatedAtMixin):
         ForeignKey("subscription.id"),
         nullable=True,
     )
+    plan_id: Mapped[int] = mapped_column(ForeignKey("plan.id"), nullable=False)
     amount_usd: Mapped[int] = mapped_column(nullable=False)  # in cents
     method: Mapped[PaymentMethod] = mapped_column(String(32), nullable=False)
     status: Mapped[PaymentStatus] = mapped_column(

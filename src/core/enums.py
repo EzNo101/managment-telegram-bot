@@ -13,8 +13,9 @@ class PaymentMethod(StrEnum):
 class PaymentStatus(StrEnum):
     PENDING = "pending"
     PAID = "paid"
-    EXPIRED = "expired"
+    REFUNDED = "refunded"
     FAILED = "failed"
+    EXPIRED = "expired"
 
 
 class SubscriptionStatus(StrEnum):

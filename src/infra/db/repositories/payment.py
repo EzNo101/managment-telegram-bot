@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.enums import PaymentMethod
-from src.infra.db.models.payments import Payment
+from src.infra.db.models.payment import Payment
 
 
 class PaymentRepository:
@@ -23,7 +23,7 @@ class PaymentRepository:
         )
         return result.scalar_one_or_none()
 
-    async def list_by_user(self, user_id: int) -> list[Payment]:
+    async def get_by_user(self, user_id: int) -> list[Payment]:
         """Get all payments for a user, newest first."""
         result = await self._session.execute(
             select(Payment)
@@ -35,6 +35,7 @@ class PaymentRepository:
     async def add(
         self,
         user_id: int,
+        plan_id: int,
         amount_usd: int,
         method: PaymentMethod,
         provider_ref: str | None = None,
@@ -42,6 +43,7 @@ class PaymentRepository:
         """Add a new payment."""
         payment = Payment(
             user_id=user_id,
+            plan_id=plan_id,
             amount_usd=amount_usd,
             method=method,
             provider_ref=provider_ref,
