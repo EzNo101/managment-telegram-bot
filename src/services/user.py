@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from src.core.config import settings
 from src.core.exceptions import UserNotFound
-from src.infra.db.models.user import User
 from src.infra.db.uow import UnitOfWork
+
+if TYPE_CHECKING:
+    from src.infra.db.models.user import User
 
 
 class UserService:

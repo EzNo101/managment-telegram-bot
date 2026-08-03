@@ -53,7 +53,6 @@ class UnitOfWork:
             else:
                 await self.rollback()
         finally:
-            # сесія закривається завжди, навіть якщо commit()/rollback() впали
             await session.close()
             self._session = None
 

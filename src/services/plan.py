@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+if TYPE_CHECKING:
+    from src.infra.db.models.plan import Plan
+
 from src.core.exceptions import PlanNotFound
-from src.infra.db.models.plan import Plan
 from src.infra.db.uow import UnitOfWork
 
 

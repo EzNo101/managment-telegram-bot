@@ -31,7 +31,17 @@ class SubscriptionRepository:
         )
         return result.scalars().first()
 
-    async def list_expired(self) -> list[Subscription]:
+    async def get_all_active(self) -> list[Subscription]:
+        """Get all active subscriptions."""
+        result = await self._session.execute(
+            select(Subscription).where(
+                Subscription.status == SubscriptionStatus.ACTIVE,
+                Subscription.end_date > datetime.now(UTC),
+            )
+        )
+        return list(result.scalars().all())
+
+    async def get_expired(self) -> list[Subscription]:
         """Get all active subscriptions that have already ended."""
         result = await self._session.execute(
             select(Subscription).where(

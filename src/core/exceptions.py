@@ -8,3 +8,7 @@ class UserAlreadyExists(Exception):
 
 class PlanNotFound(Exception):
     """Raised when a plan is not found in the database."""
+
+
+class SubscriptionNotFound(Exception):
+    """Raised when a subscription is not found in the database."""
