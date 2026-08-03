@@ -13,11 +13,9 @@ class PlanRepository:
         result = await self._session.execute(select(Plan).where(Plan.id == plan_id))
         return result.scalar_one_or_none()
 
-    async def list_all(self) -> list[Plan]:
+    async def get_all(self) -> list[Plan]:
         """Get all plans, ordered by price."""
-        result = await self._session.execute(
-            select(Plan).order_by(Plan.price_usd)
-        )
+        result = await self._session.execute(select(Plan).order_by(Plan.price_usd))
         return list(result.scalars().all())
 
     async def add(self, price_usd: int, duration_days: int) -> Plan:

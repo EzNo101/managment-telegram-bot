@@ -4,3 +4,7 @@ class UserNotFound(Exception):
 
 class UserAlreadyExists(Exception):
     """Raised when trying to create a user that already exists in the database."""
+
+
+class PlanNotFound(Exception):
+    """Raised when a plan is not found in the database."""
