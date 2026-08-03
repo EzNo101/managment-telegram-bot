@@ -31,6 +31,18 @@ class UserRepository:
         )
         return result.scalar_one_or_none()
 
+    async def get_all(self) -> list[User]:
+        """Get all users."""
+        result = await self._session.execute(select(User))
+        return list(result.scalars().all())
+
+    async def get_banned(self) -> list[User]:
+        """Get all banned users."""
+        result = await self._session.execute(
+            select(User).where(User.is_banned)
+        )
+        return list(result.scalars().all())
+
     async def add(self, tg_id: int, username: str | None) -> User:
         """Add a new user to the database."""
         user = User(telegram_id=tg_id, username=username)
