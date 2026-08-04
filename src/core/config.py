@@ -12,7 +12,12 @@ class Settings(BaseSettings):
     DB_PRE_PING: bool
 
     # Basic admins
-    ADMIN_IDS: list[int] = []
+    ADMIN_IDS: list[int]
+
+    # NOWPayments
+    NOWPAYMENTS_API_KEY: str
+    NOWPAYMENTS_IPN_SECRET: str
+    NOWPAYMENTS_WEBHOOK_URL: str
 
     model_config = SettingsConfigDict(env_file=".env")
 
