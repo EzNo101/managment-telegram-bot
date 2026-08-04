@@ -28,4 +28,5 @@ class Payment(Base, IdMixin, CreatedAtMixin, UpdatedAtMixin):
         server_default=PaymentStatus.PENDING,
     )
     provider_ref: Mapped[str | None] = mapped_column(String(255))
+    pay_url: Mapped[str | None] = mapped_column(String(255))
     paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

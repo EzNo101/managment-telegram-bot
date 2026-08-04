@@ -36,11 +36,11 @@ class NowPaymentsProvider:
 
     async def create_invoice(
         self,
-        usd_amount: int,
+        amount_usd: int,
         payment_method: PaymentMethod,
     ) -> Invoice:
         payload: dict[str, Any] = {
-            "price_amount": usd_amount / 100,  # Convert cents to dollars
+            "price_amount": amount_usd / 100,  # Convert cents to dollars
             "price_currency": "usd",
             "pay_currency": self._coins(payment_method),
             "ipn_callback_url": self._ipn_callback_url,

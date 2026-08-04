@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 from src.core.enums import PaymentMethod, PaymentStatus
 from src.core.exceptions import PaymentNotFound, PlanNotFound, UserNotFound
 from src.infra.db.uow import UnitOfWork
+from src.providers.protocol import PaymentProvider
 from src.services.subscription import SubscriptionService
 
 
@@ -20,9 +21,11 @@ class PaymentService:
         self,
         session_factory: async_sessionmaker[AsyncSession],
         subscription_service: SubscriptionService,
+        provider: PaymentProvider,
     ):
         self._session_factory = session_factory
         self._sub_service = subscription_service
+        self._provider = provider
 
     async def create(
         self,
@@ -32,8 +35,7 @@ class PaymentService:
     ) -> Payment:
         """Create a pending payment for a user and plan.
 
-        With a payment gateway integrated, this is also where you would call
-        ``provider.create_invoice(...)`` and store its reference.
+        Returns the created payment with the provider's invoice URL.
         """
         async with UnitOfWork(self._session_factory) as uow:
             user = await uow.users.get_by_id(user_id)
@@ -43,12 +45,18 @@ class PaymentService:
             if not plan:
                 raise PlanNotFound(f"Plan with id {plan_id} not found")
 
-            return await uow.payments.add(
+            payment = await uow.payments.add(
                 user_id=user.id,
                 plan_id=plan.id,
                 amount_usd=plan.price_usd,
                 method=method,
             )
+            invoice = await self._provider.create_invoice(
+                amount_usd=plan.price_usd, method=method
+            )
+            payment.provider_ref = invoice.provider_ref
+            payment.pay_url = invoice.pay_url
+            return payment
 
     async def confirm(self, provider_ref: str) -> Subscription | None:
         """Confirm a paid payment and activate the subscription.
