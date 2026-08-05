@@ -1,6 +1,6 @@
 from aiogram import F, Router
 from aiogram.filters import Command
-from aiogram.types import Message
+from aiogram.types import CallbackQuery, Message
 
 from src.bot.keyboards.inline import method_keyboard, plans_keyboard
 from src.bot.keyboards.reply import main_keyboard
@@ -19,7 +19,7 @@ def register_handlers(
     subscription_service: SubscriptionService,
 ) -> None:
     @router.message(Command("start"))
-    async def cmd_start(message: Message):
+    async def cmd_start(message: Message) -> None:
         user = message.from_user
         if user is None:
             await message.answer("User not found.")
@@ -62,4 +62,42 @@ def register_handlers(
             "🛒 Use /plans to buy a subscription.\n📋 /status shows your subscription."
         )
 
-        # TODO: Add more handlers for payment confirmation, plan selection, etc.
+    @router.callback_query(F.data.startswith("plan:"))
+    async def cb_plan(callback: CallbackQuery) -> None:
+        await callback.answer()
+        data = callback.data
+        if data is None:
+            return
+        message = callback.message
+        if message is None:
+            return
+        plan_id = int(data.split(":")[1])
+        await message.answer(
+            "Choose payment method:",
+            reply_markup=method_keyboard(plan_id, set(PaymentMethod)),
+        )
+
+    @router.callback_query(F.data.startswith("pay:"))
+    async def cb_pay(callback: CallbackQuery) -> None:
+        await callback.answer()
+        data = callback.data
+        if data is None:
+            return
+        message = callback.message
+        if message is None:
+            return
+        _, plan_id, method_name = data.split(":")
+        method = PaymentMethod[method_name.upper()]
+
+        db_user = await user_service.get_or_create(
+            callback.from_user.id,
+            callback.from_user.username,
+        )
+
+        try:
+            payment = await payment_service.create(db_user.id, int(plan_id), method)
+        except ValueError:
+            await message.answer("This payment method is not available yet.")
+            return
+
+        await message.answer(f"Pay here: {payment.pay_url}")
