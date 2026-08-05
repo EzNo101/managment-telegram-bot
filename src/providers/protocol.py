@@ -20,6 +20,7 @@ class PaymentProvider(Protocol):
         self,
         amount_usd: int,
         method: PaymentMethod,
+        order_id: str,
     ) -> Invoice:
         """Create an invoice for a user and plan."""
         ...

@@ -52,7 +52,9 @@ class PaymentService:
                 method=method,
             )
             invoice = await self._provider.create_invoice(
-                amount_usd=plan.price_usd, method=method
+                amount_usd=plan.price_usd,
+                method=method,
+                order_id=str(payment.id),
             )
             payment.provider_ref = invoice.provider_ref
             payment.pay_url = invoice.pay_url
@@ -86,6 +88,25 @@ class PaymentService:
             )
             payment.subscription_id = sub.id
             return sub
+
+    async def set_status(
+        self,
+        provider_ref: str,
+        status: PaymentStatus,
+    ) -> Payment:
+        """Update payment status from an IPN webhook.
+
+        Idempotent: a payment that is already ``PAID`` is never
+        overwritten by a late status notification.
+        """
+        async with UnitOfWork(self._session_factory) as uow:
+            payment = await uow.payments.get_by_provider_ref(provider_ref)
+            if not payment:
+                raise PaymentNotFound(f"Payment with ref {provider_ref} not found")
+            if payment.status == PaymentStatus.PAID:
+                return payment
+            payment.status = status
+            return payment
 
     async def get_by_user(self, user_id: int) -> list[Payment]:
         """Get all payments of a user, newest first."""
