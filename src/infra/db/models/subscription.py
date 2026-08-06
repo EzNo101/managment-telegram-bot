@@ -27,3 +27,7 @@ class Subscription(Base, IdMixin, CreatedAtMixin, UpdatedAtMixin):
         index=True,
         nullable=False,
     )
+    reminded_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )

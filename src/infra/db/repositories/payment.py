@@ -1,7 +1,9 @@
+from datetime import datetime
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.enums import PaymentMethod
+from src.core.enums import PaymentMethod, PaymentStatus
 from src.infra.db.models.payment import Payment
 
 
@@ -29,6 +31,16 @@ class PaymentRepository:
             select(Payment)
             .where(Payment.user_id == user_id)
             .order_by(Payment.id.desc())
+        )
+        return list(result.scalars().all())
+
+    async def get_stale(self, older_than: datetime) -> list[Payment]:
+        """Get pending payments created before ``older_than``."""
+        result = await self._session.execute(
+            select(Payment).where(
+                Payment.status == PaymentStatus.PENDING,
+                Payment.created_at < older_than,
+            )
         )
         return list(result.scalars().all())
 

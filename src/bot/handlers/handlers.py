@@ -5,6 +5,7 @@ from aiogram.types import CallbackQuery, Message
 from src.bot.keyboards.inline import method_keyboard, plans_keyboard
 from src.bot.keyboards.reply import main_keyboard
 from src.core.enums import PaymentMethod
+from src.services.invite_link import InviteLinkService
 from src.services.payment import PaymentService
 from src.services.plan import PlanService
 from src.services.subscription import SubscriptionService
@@ -17,6 +18,7 @@ def register_handlers(
     plan_service: PlanService,
     payment_service: PaymentService,
     subscription_service: SubscriptionService,
+    invite_link_service: InviteLinkService,
 ) -> None:
     @router.message(Command("start"))
     async def cmd_start(message: Message) -> None:
@@ -29,6 +31,21 @@ def register_handlers(
             user.username,
         )
         await message.answer("👋 Welcome!", reply_markup=main_keyboard())
+
+    @router.message(Command("invite"))
+    async def cmd_invite(message: Message) -> None:
+        user = message.from_user
+        if user is None:
+            return
+        db_user = await user_service.get_or_create(user.id, user.username)
+        sub = await subscription_service.get_active_by_user(db_user.id)
+        if sub is None:
+            await message.answer("You have no active subscription.")
+            return
+        link = await invite_link_service.get_active_by_user(db_user.id)
+        if link is None:
+            link = await invite_link_service.grant(db_user.id, user.id, sub.id)
+        await message.answer(f"🔑 Your access to the VIP channel:\n{link.url}")
 
     async def show_plans(message: Message) -> None:
         plans = await plan_service.get_all()

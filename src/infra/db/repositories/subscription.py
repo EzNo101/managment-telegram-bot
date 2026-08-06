@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -47,6 +47,19 @@ class SubscriptionRepository:
             select(Subscription).where(
                 Subscription.status == SubscriptionStatus.ACTIVE,
                 Subscription.end_date < datetime.now(UTC),
+            )
+        )
+        return list(result.scalars().all())
+
+    async def get_expiring_soon(self, within: timedelta) -> list[Subscription]:
+        """Get active subscriptions ending within ``within`` and not yet reminded."""
+        now = datetime.now(UTC)
+        result = await self._session.execute(
+            select(Subscription).where(
+                Subscription.status == SubscriptionStatus.ACTIVE,
+                Subscription.end_date <= now + within,
+                Subscription.end_date > now,
+                Subscription.reminded_at.is_(None),
             )
         )
         return list(result.scalars().all())

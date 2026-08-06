@@ -1,3 +1,4 @@
+from src.infra.db.models.invite_link import InviteLink
 from src.infra.db.models.payment import Payment
 from src.infra.db.models.plan import Plan
 from src.infra.db.models.subscription import Subscription

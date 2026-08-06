@@ -5,6 +5,7 @@ from typing import Self
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from src.infra.db.repositories.invite_link import InviteLinkRepository
 from src.infra.db.repositories.payment import PaymentRepository
 from src.infra.db.repositories.plan import PlanRepository
 from src.infra.db.repositories.subscription import SubscriptionRepository
@@ -26,6 +27,7 @@ class UnitOfWork:
     payments: PaymentRepository
     subscriptions: SubscriptionRepository
     plans: PlanRepository
+    invite_links: InviteLinkRepository
 
     def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
         self._session_factory = session_factory
@@ -37,6 +39,7 @@ class UnitOfWork:
         self.plans = PlanRepository(self._session)
         self.payments = PaymentRepository(self._session)
         self.subscriptions = SubscriptionRepository(self._session)
+        self.invite_links = InviteLinkRepository(self._session)
         return self
 
     async def __aexit__(
