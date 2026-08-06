@@ -16,6 +16,7 @@ from src.core.exceptions import PaymentNotFound
 from src.infra.db.session import AsyncSessionLocal
 from src.providers.nowpayments import NowPaymentsProvider
 from src.providers.protocol import PaymentProvider
+from src.providers.skrill import SkrillProvider
 from src.providers.stripe import StripeProvider
 from src.services.invite_link import InviteLinkService
 from src.services.payment import PaymentService
@@ -46,6 +47,18 @@ async def main():
             cancel_url=settings.STRIPE_CANCEL_URL,
         )
         providers.update({PaymentMethod.STRIPE: stripe_provider})
+
+    skrill_provider: SkrillProvider | None = None
+    if settings.SKRILL_SECRET_WORD:
+        skrill_provider = SkrillProvider(
+            pay_to_email=settings.SKRILL_PAY_TO_EMAIL,
+            merchant_id=settings.SKRILL_MERCHANT_ID,
+            secret_word=settings.SKRILL_SECRET_WORD,
+            status_url=f"{settings.SKRILL_WEBHOOK_URL}/webhook/skrill",
+            return_url=settings.SKRILL_RETURN_URL,
+            cancel_url=settings.SKRILL_CANCEL_URL,
+        )
+        providers.update({PaymentMethod.SKRILL: skrill_provider})
 
     user_service = UserService(AsyncSessionLocal)
     plan_service = PlanService(AsyncSessionLocal)
@@ -106,6 +119,29 @@ async def main():
     # webhook for Stripe (if configured)
     web_app = web.Application()
     web_app.router.add_post("/webhook/nowpayments", nowpayments_webhook)
+
+    if skrill_provider is not None:
+        # Skrill status: 2 processed, -1 cancelled, -2 failed, -3 chargeback
+        async def skrill_webhook(request: web.Request) -> web.Response:
+            data = dict(await request.post())
+            if not skrill_provider.verify_webhook(data, dict(request.headers)):
+                return web.Response(status=401)
+            provider_ref = data.get("transaction_id")
+            status = data.get("status")
+            try:
+                if status == "2":
+                    await confirm_and_grant(provider_ref)
+                elif status == "-3":
+                    await payment_service.set_status(provider_ref, PaymentStatus.REFUNDED)
+                elif status == "-2":
+                    await payment_service.set_status(provider_ref, PaymentStatus.FAILED)
+                elif status == "-1":
+                    await payment_service.set_status(provider_ref, PaymentStatus.EXPIRED)
+            except PaymentNotFound:
+                return web.Response(status=404)
+            return web.Response(status=200)
+
+        web_app.router.add_post("/webhook/skrill", skrill_webhook)
 
     if stripe_provider is not None:
         async def stripe_webhook(request: web.Request) -> web.Response:

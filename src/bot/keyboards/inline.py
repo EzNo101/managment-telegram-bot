@@ -27,6 +27,7 @@ def pay_keyboard(url: str) -> InlineKeyboardMarkup:
 _METHOD_LABELS = {
     PaymentMethod.BITCOIN: "₿ Bitcoin (BTC)",
     PaymentMethod.USDT: "💵 USDT (TRC20)",
+    PaymentMethod.SKRILL: "💸 Skrill",
     PaymentMethod.STRIPE: "💳 Card · Google Pay · Apple Pay · PayPal",
 }
 

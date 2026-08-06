@@ -4,6 +4,7 @@ from enum import StrEnum
 class PaymentMethod(StrEnum):
     BITCOIN = "bitcoin"
     USDT = "usdt"
+    SKRILL = "skrill"
     STRIPE = "stripe"
 
 

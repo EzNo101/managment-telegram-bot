@@ -19,6 +19,14 @@ class Settings(BaseSettings):
     NOWPAYMENTS_IPN_SECRET: str
     NOWPAYMENTS_WEBHOOK_URL: str
 
+    # Skrill
+    SKRILL_PAY_TO_EMAIL: str = ""
+    SKRILL_MERCHANT_ID: str = ""
+    SKRILL_SECRET_WORD: str = ""
+    SKRILL_WEBHOOK_URL: str = ""
+    SKRILL_RETURN_URL: str = ""
+    SKRILL_CANCEL_URL: str = ""
+
     # Stripe
     STRIPE_SECRET_KEY: str = ""
     STRIPE_WEBHOOK_SECRET: str = ""
