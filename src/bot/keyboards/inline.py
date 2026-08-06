@@ -18,13 +18,16 @@ def plans_keyboard(plans: list[Plan]) -> InlineKeyboardMarkup:
     return kb.as_markup()
 
 
+def pay_keyboard(url: str) -> InlineKeyboardMarkup:
+    kb = InlineKeyboardBuilder()
+    kb.button(text="💳 Pay now", url=url)
+    return kb.as_markup()
+
+
 _METHOD_LABELS = {
     PaymentMethod.BITCOIN: "₿ Bitcoin (BTC)",
     PaymentMethod.USDT: "💵 USDT (TRC20)",
-    PaymentMethod.PAYPAL: "💙 PayPal",
-    PaymentMethod.GOOGLE_PAY: "💳 Google Pay",
-    PaymentMethod.NETELLER: "🎰 Neteller",
-    PaymentMethod.SKRILL: "💸 Skrill",
+    PaymentMethod.STRIPE: "💳 Card · Google Pay · Apple Pay · PayPal",
 }
 
 

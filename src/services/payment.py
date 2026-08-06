@@ -21,11 +21,11 @@ class PaymentService:
         self,
         session_factory: async_sessionmaker[AsyncSession],
         subscription_service: SubscriptionService,
-        provider: PaymentProvider,
+        providers: dict[PaymentMethod, PaymentProvider],
     ):
         self._session_factory = session_factory
         self._sub_service = subscription_service
-        self._provider = provider
+        self._providers = providers
 
     async def create(
         self,
@@ -37,6 +37,10 @@ class PaymentService:
 
         Returns the created payment with the provider's invoice URL.
         """
+        provider = self._providers.get(method)
+        if provider is None:
+            raise ValueError(f"Unsupported payment method: {method}")
+
         async with UnitOfWork(self._session_factory) as uow:
             user = await uow.users.get_by_id(user_id)
             if not user:
@@ -51,7 +55,7 @@ class PaymentService:
                 amount_usd=plan.price_usd,
                 method=method,
             )
-            invoice = await self._provider.create_invoice(
+            invoice = await provider.create_invoice(
                 amount_usd=plan.price_usd,
                 method=method,
                 order_id=str(payment.id),

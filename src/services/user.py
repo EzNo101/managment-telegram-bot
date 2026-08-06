@@ -71,6 +71,17 @@ class UserService:
                 raise UserNotFound(f"User with Telegram ID {tg_id} not found")
             user.is_banned = True
 
+    async def ban_or_create(
+        self, tg_id: int, username: str | None = None
+    ) -> User:
+        """Ban a user in DB, creating the record if it doesn't exist yet."""
+        async with UnitOfWork(self._session_factory) as uow:
+            user = await uow.users.get_by_tg_id(tg_id)
+            if user is None:
+                user = await uow.users.add(tg_id, username)
+            user.is_banned = True
+            return user
+
     async def unban(self, tg_id: int) -> None:
         """Unban a user."""
         async with UnitOfWork(self._session_factory) as uow:
@@ -94,3 +105,9 @@ class UserService:
         async with UnitOfWork(self._session_factory) as uow:
             user = await uow.users.get_by_tg_id(tg_id)
             return bool(user and user.is_admin)
+
+    async def is_banned(self, tg_id: int) -> bool:
+        """Check if a user is banned."""
+        async with UnitOfWork(self._session_factory) as uow:
+            user = await uow.users.get_by_tg_id(tg_id)
+            return bool(user and user.is_banned)

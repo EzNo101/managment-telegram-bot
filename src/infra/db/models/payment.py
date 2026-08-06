@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, String
+from sqlalchemy import DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.core.enums import PaymentMethod, PaymentStatus
@@ -28,5 +28,5 @@ class Payment(Base, IdMixin, CreatedAtMixin, UpdatedAtMixin):
         server_default=PaymentStatus.PENDING,
     )
     provider_ref: Mapped[str | None] = mapped_column(String(255))
-    pay_url: Mapped[str | None] = mapped_column(String(255))
+    pay_url: Mapped[str | None] = mapped_column(Text)
     paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

@@ -2,7 +2,7 @@ from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 
-from src.bot.keyboards.inline import method_keyboard, plans_keyboard
+from src.bot.keyboards.inline import method_keyboard, pay_keyboard, plans_keyboard
 from src.bot.keyboards.reply import main_keyboard
 from src.core.enums import PaymentMethod
 from src.services.invite_link import InviteLinkService
@@ -117,4 +117,7 @@ def register_handlers(
             await message.answer("This payment method is not available yet.")
             return
 
-        await message.answer(f"Pay here: {payment.pay_url}")
+        await message.answer(
+            "Payment ready. Tap the button to open the secure checkout:",
+            reply_markup=pay_keyboard(payment.pay_url) if payment.pay_url else None,
+        )

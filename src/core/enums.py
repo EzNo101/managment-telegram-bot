@@ -4,10 +4,7 @@ from enum import StrEnum
 class PaymentMethod(StrEnum):
     BITCOIN = "bitcoin"
     USDT = "usdt"
-    SKRILL = "skrill"
-    PAYPAL = "paypal"
-    GOOGLE_PAY = "google_pay"
-    NETELLER = "neteller"
+    STRIPE = "stripe"
 
 
 class PaymentStatus(StrEnum):

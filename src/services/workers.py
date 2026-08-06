@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import time
 from datetime import UTC, datetime, timedelta
 
 from aiogram import Bot
@@ -35,7 +36,10 @@ class Worker:
                 sub.status = SubscriptionStatus.EXPIRED
                 try:
                     await self._bot.ban_chat_member(
-                        settings.CHANNEL_ID, user.telegram_id
+                        settings.CHANNEL_ID,
+                        user.telegram_id,
+                        until_date=int(time.time())
+                        + 60,  # ban for 1 minute to kick user
                     )
                 except TelegramAPIError:
                     pass
@@ -49,7 +53,9 @@ class Worker:
 
     async def stale_payments(self) -> None:
         """Expire pending payments that have been sitting too long and notify users."""
-        threshold = datetime.now(UTC) - timedelta(hours=settings.STALE_PAYMENT_TTL_HOURS)
+        threshold = datetime.now(UTC) - timedelta(
+            hours=settings.STALE_PAYMENT_TTL_HOURS
+        )
         async with UnitOfWork(self._session_factory) as uow:
             stale = await uow.payments.get_stale(threshold)
             logger.info("stale_payments: found %d stale payment(s)", len(stale))
@@ -72,7 +78,9 @@ class Worker:
         now = datetime.now(UTC)
         async with UnitOfWork(self._session_factory) as uow:
             expiring = await uow.subscriptions.get_expiring_soon(within)
-            logger.info("renew_reminders: found %d expiring subscription(s)", len(expiring))
+            logger.info(
+                "renew_reminders: found %d expiring subscription(s)", len(expiring)
+            )
             for sub in expiring:
                 user = await uow.users.get_by_id(sub.user_id)
                 if user is None:

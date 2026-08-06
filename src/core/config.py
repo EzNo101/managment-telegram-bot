@@ -19,6 +19,13 @@ class Settings(BaseSettings):
     NOWPAYMENTS_IPN_SECRET: str
     NOWPAYMENTS_WEBHOOK_URL: str
 
+    # Stripe
+    STRIPE_SECRET_KEY: str = ""
+    STRIPE_WEBHOOK_SECRET: str = ""
+    STRIPE_WEBHOOK_URL: str = ""
+    STRIPE_SUCCESS_URL: str = ""
+    STRIPE_CANCEL_URL: str = ""
+
     # Private channel
     CHANNEL_ID: int
     INVITE_EXPIRE_SECONDS: int = 3 * 24 * 3600
